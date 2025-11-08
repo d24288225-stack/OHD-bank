@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const { pool } = require('./db');
 const auth = require('./auth');
 const userRoutes = require('./user');
-const adminRoutes = require('.//admin');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 app.use(express.json());
