@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 max-w-md mx-auto bg-gray-50">
+  <h1 class="text-2xl font-bold text-green-700">Admin Panel</h1>
+
+  <div class="mt-6">
+    <input id="acc" placeholder="Account Number" class="border p-2 w-full rounded">
+    <input id="am" type="number" placeholder="Amount" class="border p-2 w-full mt-2 rounded">
+    <input id="rs" placeholder="Reason" class="border p-2 w-full mt-2 rounded">
+    <button onclick="credit()" class="bg-green-600 text-white p-2 w-full mt-2 rounded">Add Credit</button>
+  </div>
+
+  <div id="pend" class="mt-6 text-sm"></div>
+
+  <script>
+    async function load() {
+      const r = await fetch('/api/admin/pending', { credentials: 'include' });
+      const d = await r.json();
+      const p = document.getElementById('pend');
+      p.innerHTML = '<h3 class="font-bold mt-4">Pending Transfers</h3>';
+      d.forEach(i => {
+        p.innerHTML += `
+          <div class="border p-2 mt-2 rounded">
+            <p><strong>ID:</strong> ${i.id}</p>
+            <p><strong>To:</strong> ${i.to_account_number} | <strong>Amount:</strong> $${i.amount}</p>
+            <button onclick="review(${i.id}, 'approved')" class="bg-green-500 text-white px-2 py-1 rounded mr-1">Approve</button>
+            <button onclick="review(${i.id}, 'rejected')" class="bg-red-500 text-white px-2 py-1 rounded">Reject</button>
+          </div>`;
+      });
+    }
+    load();
+
+    async function credit() {
+      const acc = document.getElementById('acc').value;
+      const am = parseFloat(document.getElementById('am').value);
+      const rs = document.getElementById('rs').value;
+      await fetch('/api/admin/credit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ account_number: acc, amount: am, reason: rs })
+      });
+      alert('Credit added!');
+    }
+
+    async function review(id, status) {
+      const note = prompt('Review note:');
+      if (note === null) return;
+      await fetch('/api/admin/review-transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ transfer_id: id, status, note })
+      });
+      load();
+    }
+  </script>
+</body>
+</html>

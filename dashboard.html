@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6 max-w-md mx-auto bg-gray-50">
+  <h1 class="text-2xl font-bold text-blue-700">OHD Bank</h1>
+  <p class="text-sm mt-2">Balance: <strong>$<span id="bal">0.00</span></strong></p>
+
+  <div class="mt-6">
+    <input id="to" placeholder="To Account (OHD...)" class="border p-2 w-full rounded">
+    <input id="amt" type="number" placeholder="Amount" class="border p-2 w-full mt-2 rounded">
+    <button onclick="transfer()" class="bg-blue-600 text-white p-2 w-full mt-2 rounded">Request Transfer</button>
+  </div>
+
+  <div id="hist" class="mt-6 text-sm"></div>
+
+  <script>
+    async function load() {
+      const r = await fetch('/api/user/data', { credentials: 'include' });
+      const d = await r.json();
+      document.getElementById('bal').innerText = d.balance.toFixed(2);
+      const h = document.getElementById('hist');
+      h.innerHTML = '<h3 class="font-bold mt-4">History</h3>';
+      d.history.forEach(i => {
+        h.innerHTML += `<p>${i.type}: $${i.amount} — ${i.description}</p>`;
+      });
+    }
+    load();
+
+    async function transfer() {
+      const to = document.getElementById('to').value;
+      const amt = parseFloat(document.getElementById('amt').value);
+      await fetch('/api/user/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ to_account_number: to, amount: amt })
+      });
+      alert('Transfer request submitted!');
+      load();
+    }
+  </script>
+</body>
+</html>
