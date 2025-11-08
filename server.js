@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const { pool } = require('./db');
 const auth = require('./auth');
-const userRoutes = require('./user');
+const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
